@@ -3,7 +3,7 @@
  * Author: Javier Julio
  * Licensed under the MIT license
  */
-;(function ($, window, document, undefined) {
+(function ($, window, document, undefined) {
 
   var pluginName = "textareaAutoSize";
   var pluginDataName = "plugin_" + pluginName;
@@ -15,12 +15,12 @@
   function Plugin(element, options) {
     this.element = element;
     this.$element = $(element);
-    this.init();
+    this.options = options; 
+    this.options === "destroy" ? this.destroy() : this.init();
   }
 
   Plugin.prototype = {
-    init: function() {
-      var height = this.$element.outerHeight();
+    init: function () {
       var diff = parseInt(this.$element.css('paddingBottom')) +
                  parseInt(this.$element.css('paddingTop')) || 0;
 
@@ -28,8 +28,10 @@
         this.$element.height(this.element.scrollHeight - diff);
       }
 
+      this.$element.addClass("autosize");
+
       // keyup is required for IE to properly reset height when deleting text
-      this.$element.on('input keyup', function(event) {
+      $(document).on('input keyup', 'textarea.autosize', function () { 
         var $window = $(window);
         var currentScrollPosition = $window.scrollTop();
 
@@ -38,17 +40,23 @@
           .height(this.scrollHeight - diff);
 
         $window.scrollTop(currentScrollPosition);
+
       });
+    },      
+    destroy: function() {
+      $(document).off("input keyup", "textarea.autosize");
+      this.$element.removeClass("autosize");
     }
   };
 
   $.fn[pluginName] = function (options) {
-    this.each(function() {
+
+    return this.each(function() {
       if (!$.data(this, pluginDataName)) {
         $.data(this, pluginDataName, new Plugin(this, options));
       }
     });
-    return this;
+    // return this; ////// each already returns this
   };
 
 })(jQuery, window, document);
