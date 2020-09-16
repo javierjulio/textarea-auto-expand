@@ -3,10 +3,26 @@
  * Author: Javier Julio
  * Licensed under the MIT license
  */
-;(function ($, window, document, undefined) {
+(function (factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module depending on jQuery.
+    define(['jquery'], function ($) {
+      factory($);
+    });
+  } else if (typeof module === 'object' && module.exports) {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory(require('jquery'));
+  } else {
+    // No AMD. Register plugin with global jQuery object.
+    factory(jQuery);
+  }
+}(function ($) {
 
   var pluginName = "textareaAutoSize";
   var pluginDataName = "plugin_" + pluginName;
+  var PluginFactory;
 
   var containsText = function (value) {
     return (value.replace(/\s/g, '').length > 0);
@@ -43,7 +59,7 @@
     }
   };
 
-  $.fn[pluginName] = function (options) {
+  PluginFactory = function (options) {
     this.each(function() {
       if (!$.data(this, pluginDataName)) {
         $.data(this, pluginDataName, new Plugin(this, options));
@@ -52,4 +68,9 @@
     return this;
   };
 
-})(jQuery, window, document);
+  if ($.fn) {
+     $.fn[pluginName] = PluginFactory;
+  } else {
+     return PluginFactory;
+  }
+}));
